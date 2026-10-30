@@ -168,7 +168,7 @@ summary{font-size:1rem}
 
   <section id='perfil' class='hidden'>
     <div class='card'><h2 style='margin-top:0'>👤 Mi perfil</h2>
-      <div style='text-align:center;margin-bottom:10px'><div id='pFotoBox'></div><div style='display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px'><label class='btnlab'>📷 Tomar foto<input type='file' id='fotoCam' accept='image/*' capture='user'></label><label class='btnlab'>🖼️ Elegir de galería<input type='file' id='fotoIn' accept='image/*'></label></div></div>
+      <div style='text-align:center;margin-bottom:10px'><div id='pFotoBox'></div><div style='display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px'><button type='button' id='btnCam'>📷 Tomar foto</button><button type='button' class='ghost' id='btnGal'>🖼️ Elegir de galería</button></div><input type='file' id='fotoCam' accept='image/*' capture='user' style='display:none'><input type='file' id='fotoIn' accept='image/*' style='display:none'><div id='fotoMsg' class='err'></div></div>
       <p>Nombre: <b id='pNom'></b></p><p>Aula: <b id='pAula'></b></p>
       <p>Mejor puntuación en el juego: <b id='pBest'></b></p>
       <p>🔥 Racha: <b id='pRacha'></b></p>
@@ -234,7 +234,6 @@ const FIREBASE_CONFIG = {
   appId: "PEGA_AQUI"
 };
 const ADMIN_EMAIL = "tucorreo@gmail.com"; // el correo con el que creaste tu usuario administrador en Firebase
-const ADMIN_PASS = "ErickYT"; // solo se usa si NO has configurado Firebase (modo de prueba)
 // ============================================================
 let DBUSER=null,FBA=null;
 const wrapFS=fs=>({collection:n=>({doc:id=>{const r=fs.collection(n).doc(id);return{get:async()=>{const x=await r.get();return{id:x.id,data:()=>x.exists?x.data():undefined}},set:d=>r.set(d),update:d=>r.update(d),delete:()=>r.delete()}},get:async()=>{const q=await fs.collection(n).get();return{forEach:f=>q.forEach(d=>f({id:d.id,data:()=>d.data()}))}}})});
@@ -246,7 +245,7 @@ async function iniciarDB(){
 }
 async function loginAdmin(pw){
   if(FBA){try{await FBA.auth.signInWithEmailAndPassword(ADMIN_EMAIL,pw);DBUSER=db;db=FBA.db;return true}catch(e){return false}}
-  return pw===ADMIN_PASS;
+  return false;
 }
 const TEMAS = [
  {t:"Cómo usar Microsoft Excel",c:"Excel",k:"excel hoja calculo celdas formulas suma tabla grafico",
@@ -389,7 +388,19 @@ async function guardarRanking(add){const u=usuario();if(!u)return;let pts=0;try{
 async function cargarRanking(){if(!db)return;try{const s=await db.collection('ranking').get();const a=[];s.forEach(d=>a.push(d.data()));a.sort((x,y)=>(y.puntos-x.puntos)||String(x.fecha).localeCompare(String(y.fecha)));RANK=a}catch(e){}pintarTop1();pintarRank()}
 function pintarTop1(){const t=$('top1');if(!t)return;if(!RANK.length||SECC==='reg'){t.className='card top1 hidden';return}const r=RANK[0];t.className='card top1';t.innerHTML='';const s=document.createElement('span');s.textContent='👑 Top 1: '+r.nombre+' · '+r.puntos+' pts';t.append(av(r.foto,r.nombre,34),s)}
 function pintarRank(){const b=$('rank');if(!b)return;b.innerHTML='';if(!RANK.length){b.textContent='Aún nadie en el ranking. ¡Sé el primero! 🏁';return}const u=usuario()||{},med=['🥇','🥈','🥉'];RANK.slice(0,10).forEach((r,i)=>{const f=document.createElement('div');f.className='rk'+(r.nombre===u.nombre&&r.aula===u.aula?' yo':'');const p=document.createElement('b');p.textContent=med[i]||(i+1)+'.';const n=document.createElement('span');n.textContent=r.nombre+' (aula '+r.aula+')';n.style.flex='1';const pt=document.createElement('b');pt.textContent=r.puntos+' pts';f.append(p,av(r.foto,r.nombre,32),n,pt);b.appendChild(f)})}
-const subirFoto=e=>{const f=e.target.files[0];if(!f||!f.type.startsWith('image/'))return;const im=new Image(),url=URL.createObjectURL(f);im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=96;const x=c.getContext('2d'),m=Math.min(im.width,im.height);x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,96,96);URL.revokeObjectURL(url);try{localStorage.setItem('inf11_foto',c.toDataURL('image/jpeg',.7))}catch(er){}pintarPerfil();guardarRanking(0)};im.src=url;e.target.value=''};
+const subirFoto=e=>{const f=e.target.files[0],m=$('fotoMsg');m.style.color='';m.textContent='';if(!f)return;
+const rd=new FileReader();
+rd.onerror=()=>{m.textContent='No se pudo leer la foto.'};
+rd.onload=()=>{const im=new Image();
+ im.onerror=()=>{m.textContent='Ese formato de foto no funciona. Prueba con otra.'};
+ im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=96;const x=c.getContext('2d'),s=Math.min(im.width,im.height);x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,96,96);
+  try{localStorage.setItem('inf11_foto',c.toDataURL('image/jpeg',.7))}catch(er){m.textContent='No se pudo guardar la foto.';return}
+  pintarPerfil();m.style.color='var(--mut)';m.textContent='✅ Foto actualizada';guardarRanking(0)};
+ im.src=rd.result};
+rd.onloadend=()=>{e.target.value=''};
+rd.readAsDataURL(f)};
+$('btnCam').onclick=()=>$('fotoCam').click();
+$('btnGal').onclick=()=>$('fotoIn').click();
 $('fotoIn').onchange=subirFoto;$('fotoCam').onchange=subirFoto;
 function racha(){const hoy=new Date().toDateString(),ay=new Date(Date.now()-864e5).toDateString();let r={f:'',n:0};try{r=JSON.parse(localStorage.getItem('inf11_racha'))||r}catch(e){}if(r.f!==hoy){r.n=r.f===ay?r.n+1:1;r.f=hoy;try{localStorage.setItem('inf11_racha',JSON.stringify(r))}catch(e){}}return r.n}
 async function touch(){const u=usuario();if(!db||!uid||!u)return;try{await db.collection('registros').doc(uid).update({ultimo:new Date().toISOString(),racha:racha()})}catch(e){}}
