@@ -245,6 +245,7 @@ async function iniciarDB(){
   const appA=firebase.initializeApp(FIREBASE_CONFIG,"admin");FBA={auth:appA.auth(),db:wrapFS(appA.firestore())};
 }
 async function loginAdmin(pw){
+  pw=String(pw||"").trim();
   if(FBA){try{await FBA.auth.signInWithEmailAndPassword(ADMIN_EMAIL,pw);DBUSER=db;db=FBA.db;return true}catch(e){return false}}
   return pw===ADMIN_PASS;
 }
