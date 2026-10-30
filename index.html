@@ -234,6 +234,7 @@ const FIREBASE_CONFIG = {
   appId: "PEGA_AQUI"
 };
 const ADMIN_EMAIL = "tucorreo@gmail.com"; // el correo con el que creaste tu usuario administrador en Firebase
+const ADMIN_PASS = "ErickYT"; // solo se usa si NO has configurado Firebase (modo de prueba)
 // ============================================================
 let DBUSER=null,FBA=null;
 const wrapFS=fs=>({collection:n=>({doc:id=>{const r=fs.collection(n).doc(id);return{get:async()=>{const x=await r.get();return{id:x.id,data:()=>x.exists?x.data():undefined}},set:d=>r.set(d),update:d=>r.update(d),delete:()=>r.delete()}},get:async()=>{const q=await fs.collection(n).get();return{forEach:f=>q.forEach(d=>f({id:d.id,data:()=>d.data()}))}}})});
@@ -245,7 +246,7 @@ async function iniciarDB(){
 }
 async function loginAdmin(pw){
   if(FBA){try{await FBA.auth.signInWithEmailAndPassword(ADMIN_EMAIL,pw);DBUSER=db;db=FBA.db;return true}catch(e){return false}}
-  return false;
+  return pw===ADMIN_PASS;
 }
 const TEMAS = [
  {t:"Cómo usar Microsoft Excel",c:"Excel",k:"excel hoja calculo celdas formulas suma tabla grafico",
