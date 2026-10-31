@@ -245,7 +245,6 @@ async function iniciarDB(){
   const appA=firebase.initializeApp(FIREBASE_CONFIG,"admin");FBA={auth:appA.auth(),db:wrapFS(appA.firestore())};
 }
 async function loginAdmin(pw){
-  pw=String(pw||"").trim();
   if(FBA){try{await FBA.auth.signInWithEmailAndPassword(ADMIN_EMAIL,pw);DBUSER=db;db=FBA.db;return true}catch(e){return false}}
   return pw===ADMIN_PASS;
 }
@@ -517,7 +516,7 @@ async function cargarAdmin(){AMSG='';
  await cargarRanking();pintarAdmin()}
 function pintarAdmin(){const b=$('aBody');b.innerHTML='';if(AMSG)b.appendChild(el('p','err',AMSG));
  if(TAB==='resumen'){const hoy=new Date().toDateString(),sum=k=>ADM.reduce((t,r)=>t+(+r[k]||0),0);
-  const it=[['👥',ADM.length,'Registrados'],['🟢',ADM.filter(r=>r.ultimo&&new Date(r.ultimo).toDateString()===hoy).length,'Activos hoy'],['🎮',ADM.filter(r=>r.partidas>0).length,'Han jugado'],['🔍',ADM.filter(r=>r.busquedas>0).length,'Han buscado'],['🏁',sum('partidas'),'Partidas totales'],['💬',sum('busquedas'),'Búsquedas totales'],['🚫',Object.keys(BANS).length,'Expulsados'],['👑',RANK[0]?RANK[0].nombre:'—','Top 1']];
+  const it=[['👥',ADM.length,'Registrados'],['🟢',ADM.filter(r=>r.ultimo&&new Date(r.ultimo).toDateString()===hoy).length,'Activos hoy'],['🎮',ADM.filter(r=>r.partidas>0).length,'Han jugado'],['🔍',ADM.filter(r=>r.busquedas>0).length,'Han buscado'],['🏁',sum('partidas'),'Partidas totales'],['💬',sum('busquedas'),'Búsquedas totales'],['🚫',Object.keys(BANS).length,'Expulsados'],['👑',RANK[0]?RANK[0].nombre:'—','Top 1'],['👁️',VISITAS,'Dispositivos que han entrado']];
   const g=el('div','stats');it.forEach(([i,v,t])=>{const c=el('div','stat'),n=el('b',null,i+' '+v);if(String(v).length>8)n.style.fontSize='1.1rem';c.append(n,el('span',null,t));g.appendChild(c)});b.appendChild(g);
   b.appendChild(el('h3',null,'🆕 Miembros recientes'));
   ADM.slice().sort((x,y)=>String(y.fecha||'').localeCompare(String(x.fecha||''))).slice(0,5).forEach(r=>{const f=el('div','feed',r.nombre+' · aula '+r.aula);f.appendChild(el('small',null,'Se unió: '+fmt(r.fecha)));b.appendChild(f)});
@@ -549,12 +548,18 @@ function abrirSheet(r){const sh=$('aSheet');sh.innerHTML='';sh.classList.remove(
  const cr=el('button','ghost','Cerrar');cr.style.marginTop='10px';cr.onclick=()=>sh.classList.add('hidden');bx.appendChild(cr)}
 function marcarTab(){document.querySelectorAll('.atabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===TAB))}
 document.querySelectorAll('.atabs button').forEach(b=>b.onclick=()=>{TAB=b.dataset.t;marcarTab();pintarAdmin()});
-$('passBtn').onclick=async()=>{if(!(await loginAdmin($('pass').value))){$('passErr').textContent='Contraseña incorrecta.';return}$('passErr').textContent='';$('pass').value='';$('adminApp').classList.remove('hidden');TAB='resumen';marcarTab();AMSG='Cargando…';pintarAdmin();cargarAdmin()};
+const VISITAS_API='https://countapi.mileshilliard.com/api/v1/',VISITAS_KEY='web-de-erick-erickyt2010-visitas';
+let VISITAS='…';
+function contarVisita(){try{if(localStorage.getItem('inf11_contado'))return}catch(e){return}
+ fetch(VISITAS_API+'hit/'+VISITAS_KEY).then(r=>r.ok?r.json():null).then(d=>{if(d){try{localStorage.setItem('inf11_contado','1')}catch(e){}}}).catch(()=>{})}
+async function cargarVisitas(){try{const r=await fetch(VISITAS_API+'get/'+VISITAS_KEY);const d=r.ok?await r.json():null;VISITAS=d&&d.value!=null?String(d.value):'0'}catch(e){VISITAS='sin conexión'}
+ if(!$('adminApp').classList.contains('hidden'))pintarAdmin()}
+$('passBtn').onclick=async()=>{if(!(await loginAdmin($('pass').value))){$('passErr').textContent='Contraseña incorrecta.';return}$('passErr').textContent='';$('pass').value='';$('adminApp').classList.remove('hidden');TAB='resumen';marcarTab();AMSG='Cargando…';pintarAdmin();cargarAdmin();cargarVisitas()};
 $('aSalir').onclick=async()=>{if(FBA&&DBUSER){db=DBUSER;DBUSER=null;try{await FBA.auth.signOut()}catch(e){}}$('adminApp').classList.add('hidden');$('aSheet').classList.add('hidden');const u=usuario();u?entrar(u):mostrar('reg')};
 (async()=>{
   try{localStorage.removeItem("inf11_user")}catch(e){}
   try{await iniciarDB()}catch(e){}
-  cargarAvisos();setInterval(cargarAvisos,30000);touch();cargarRanking();setInterval(cargarRanking,30000);
+  contarVisita();cargarAvisos();setInterval(cargarAvisos,30000);touch();cargarRanking();setInterval(cargarRanking,30000);
 })();
 </script>
 </body>
