@@ -118,6 +118,22 @@ summary{font-size:1rem}
 .tag{background:rgba(36,87,230,.1);border-color:transparent;color:var(--pri)}
 .stat{box-shadow:var(--sh)}
 .top1{background:linear-gradient(90deg,rgba(255,185,0,.16),var(--card));border-color:rgba(255,185,0,.45)}
+
+/* ===== Fondo de adentro (después de iniciar sesión) ===== */
+body.dentro{background-image:radial-gradient(760px 520px at 100% 0%,rgba(20,184,166,.24),transparent 65%),radial-gradient(760px 520px at 0% 100%,rgba(139,92,246,.22),transparent 65%),radial-gradient(rgba(120,140,200,.24) 1.3px,transparent 1.3px);background-size:auto,auto,26px 26px;background-attachment:fixed}
+body.dentro header::after{background:linear-gradient(90deg,#14b8a6,#8b5cf6)}
+/* ===== Rompecabezas ===== */
+.jz{position:relative;margin:12px auto;border:2px dashed var(--bd);border-radius:10px;user-select:none;-webkit-user-select:none;background:rgba(120,140,200,.07)}
+.jb{position:absolute;left:0;top:0;border-bottom:2px dashed var(--bd);background:rgba(120,140,200,.10)}
+.jg{position:absolute;left:0;top:0;background-image:var(--pzimg);background-size:100% 100%;opacity:0;pointer-events:none}
+.jz.guia .jg{opacity:.22}
+.jp{position:absolute;left:0;top:0;touch-action:none;cursor:grab}
+.jp.suelta{filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
+.pzbar{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0;align-items:center}
+.pzbar button{flex:1;padding:10px 8px;font-size:.85rem;min-width:90px}
+.pzinfo{display:flex;justify-content:space-between;color:var(--mut);font-size:.9rem}
+#pzP{width:100%;max-width:420px;margin:8px auto;border-radius:12px}
+#pzP:not(.hidden){display:block}
 </style>
 </head>
 <body>
@@ -176,6 +192,7 @@ summary{font-size:1rem}
   </section>
   <section id='juegos' class='hidden'>
     <div class='card'><h2 style='margin-top:0'>🎮 Juego de preguntas</h2><div id='quiz'></div></div>
+    <div class='card'><h2 style='margin-top:0'>🧩 Rompecabezas de la computadora</h2><div id='puz'></div></div>
     <div class='card'><h2 style='margin-top:0'>🏆 Ranking</h2><p style='color:var(--mut);margin-top:0'>Cada acierto vale 10 puntos. Si haces 10/10, ¡+20 de bonus! Los puntos se acumulan.</p><div id='rank'></div></div>
   </section>
 
@@ -412,7 +429,7 @@ function pintarAvisos(){const box=$('avList');box.innerHTML='';if(!AV.length){bo
 $('bellBtn').onclick=async e=>{e.stopPropagation();if(SECC==='avisos'){mostrar(PREV||'contenido');return}await cargarAvisos();pintarAvisos();mostrar('avisos')};
 $('menuBtn').onclick=e=>{e.stopPropagation();$('menu').classList.toggle('hidden')};
 document.addEventListener('click',()=>$('menu').classList.add('hidden'));
-document.querySelectorAll('#menu button').forEach(b=>b.onclick=()=>{if(b.dataset.v==='perfil')pintarPerfil();if(b.dataset.v==='juegos'){iniciarQuiz();cargarRanking()}if(b.dataset.v==='contenido'){CAT='';$('q').value='';pintar()}mostrar(b.dataset.v)});
+document.querySelectorAll('#menu button').forEach(b=>b.onclick=()=>{if(b.dataset.v==='perfil')pintarPerfil();if(b.dataset.v==='juegos'){iniciarQuiz();puzInit();cargarRanking()}if(b.dataset.v==='contenido'){CAT='';$('q').value='';pintar()}mostrar(b.dataset.v)});
 $('avBack').onclick=()=>mostrar(PREV||'contenido');
 function mejor(){try{return +localStorage.getItem('inf11_best')||0}catch(e){return 0}}
 function pintarPerfil(){const u=usuario()||{nombre:'',aula:''};$('pNom').textContent=u.nombre;$('pAula').textContent=u.aula;$('pBest').textContent=mejor()+' / 10';$('pRacha').textContent=racha()+' día(s)';$('pFotoBox').replaceChildren(av(miFoto(),u.nombre,84))}
@@ -447,7 +464,7 @@ function verPreg(){const z=QZ,box=$('quiz');if(z.i>=10){return fin()}const p=z.s
  p.o.forEach((txt,k)=>{const b=document.createElement('button');b.className='opt';b.textContent=txt;b.onclick=()=>resp(k);box.appendChild(b)})}
 function resp(k){const z=QZ,p=z.sel[z.i],box=$('quiz'),bs=box.querySelectorAll('.opt');bs.forEach((b,j)=>{b.disabled=true;if(j===p.a)b.classList.add('ok');else if(j===k)b.classList.add('mal')});
  if(k===p.a)z.p++;const n=document.createElement('button');n.textContent=z.i===9?'Ver resultado':'Siguiente →';n.onclick=()=>{z.i++;verPreg()};box.appendChild(n)}
-function fin(){const z=QZ,box=$('quiz');if(z.p>mejor()){try{localStorage.setItem('inf11_best',z.p)}catch(e){}}guardarRanking(z.p*10+(z.p===10?20:0));act({partidas:cont('inf11_partidas'),ultPartida:z.p,ultPartidaF:new Date().toISOString()});
+function fin(){const z=QZ,box=$('quiz');hit('jug',1);hit('part');if(z.p>mejor()){try{localStorage.setItem('inf11_best',z.p)}catch(e){}}guardarRanking(z.p*10+(z.p===10?20:0));act({partidas:cont('inf11_partidas'),ultPartida:z.p,ultPartidaF:new Date().toISOString()});
  const m=z.p===10?'¡Perfecto! 🏆 Eres un crack de la informática.':z.p>=8?'¡Excelente! 🔥':z.p>=5?'¡Bien! Sigue practicando 💪':'Repasa los temas de Información y vuelve a intentarlo 📚';
  box.innerHTML='';const a=document.createElement('h3');a.textContent='Tu puntuación: '+z.p+' / 10';const b=document.createElement('p');b.textContent=m+' Tu mejor: '+mejor()+' / 10';
  const r=document.createElement('button');r.textContent='Jugar otra vez';r.onclick=iniciarQuiz;box.append(a,b,r)}
@@ -465,7 +482,7 @@ function pintar(){const q=norm($('q').value.trim()),L=$('lista');L.innerHTML='';
  if(!q)r=r.filter(x=>x.c===CAT);
  if(!q){const b=el('button','ghost','← Categorías');b.onclick=()=>{CAT='';pintar()};L.appendChild(b)}
  const w=document.createElement('div');w.innerHTML=r.length?r.map(x=>`<details><summary>${x.t}<span class="tag">${x.c}</span></summary>${x.h}</details>`).join(''):"<p style='color:var(--mut)'>No encontré nada con esa búsqueda 🤔</p>";L.appendChild(w)}
-function mostrar(sec){["reg","contenido","admin","perfil","juegos","avisos","bienvenida"].forEach(s=>$(s).classList.toggle("hidden",s!==sec));$("menuBtn").classList.toggle("hidden",sec==="reg");$("bellBtn").classList.toggle("hidden",sec==="reg");$("menu").classList.add("hidden");if(sec==='avisos'&&SECC!=='avisos')PREV=SECC;SECC=sec;pintarTop1()}
+function mostrar(sec){["reg","contenido","admin","perfil","juegos","avisos","bienvenida"].forEach(s=>$(s).classList.toggle("hidden",s!==sec));$("menuBtn").classList.toggle("hidden",sec==="reg");$("bellBtn").classList.toggle("hidden",sec==="reg");$("menu").classList.add("hidden");if(sec==='avisos'&&SECC!=='avisos')PREV=SECC;SECC=sec;document.body.classList.toggle('dentro',sec!=='reg'&&sec!=='admin');pintarTop1()}
 function entrar(u,nuevo){
   $("hello").textContent="Hola, "+u.nombre+" · Aula "+u.aula+" 👋";racha();touch();
   if(nuevo)$("bvTitulo").textContent="¡Bienvenido, "+u.nombre.split(" ")[0]+"!";revisarBan();mostrar(nuevo?"bienvenida":"contenido");pintar();
@@ -496,10 +513,10 @@ $("regForm").onsubmit=async(ev)=>{ev.preventDefault();
   const u={nombre,aula};
   try{localStorage.setItem("inf11_user",JSON.stringify(u))}catch(e){}
   try{if(db)await db.collection("registros").doc(uid||("anon"+Date.now())).set({...u,h,uid,ultimo:new Date().toISOString(),racha:racha(),fecha:new Date().toISOString()})}catch(e){}
-  entrar(u,true);
+  hit('reg',1);entrar(u,true);
 };
 $("bvBtn").onclick=()=>mostrar("contenido");
-let tq=null;$("q").oninput=()=>{pintar();clearTimeout(tq);tq=setTimeout(()=>{const v=$("q").value.trim();if(v.length>=3)act({busquedas:cont('inf11_busq'),ultBusq:v.slice(0,60),ultBusqF:new Date().toISOString()})},1500)};
+let tq=null;$("q").oninput=()=>{pintar();clearTimeout(tq);tq=setTimeout(()=>{const v=$("q").value.trim();if(v.length>=3){hit('busq',1);hit('busqT')}if(v.length>=3)act({busquedas:cont('inf11_busq'),ultBusq:v.slice(0,60),ultBusqF:new Date().toISOString()})},1500)};
 $("admBtn").onclick=()=>mostrar("admin");
 $("back").onclick=()=>{const u=usuario();u?entrar(u):mostrar("reg")};
 function cont(k){let n=0;try{n=(+localStorage.getItem(k)||0)+1;localStorage.setItem(k,n)}catch(e){n=1}return n}
@@ -510,13 +527,13 @@ const fmt=t=>{if(!t)return '—';const d=new Date(t);return d.toLocaleDateString
 const fotoDe=r=>{const k=RANK.find(x=>x.uid===r.uid||(x.nombre===r.nombre&&x.aula===r.aula));return k?k.foto:''};
 async function enviarTexto(r,t){const ref=db.collection('avisos').doc(r.uid);let l=[];try{const s=await ref.get();const d=s.data&&s.data();if(d&&d.lista)l=d.lista}catch(e){}l.push({t,f:new Date().toISOString()});await ref.set({lista:l.slice(-30)})}
 async function cargarAdmin(){AMSG='';
- if(!db){AMSG='La base de datos no está disponible ahora.';pintarAdmin();return}
+ if(!db){AMSG='Modo sin base de datos: se muestran solo totales, sin nombres.';pintarAdmin();return}
  try{const s=await db.collection('registros').get();const a=[];s.forEach(d=>{const x=d.data();x.uid=x.uid||d.id;a.push(x)});a.sort((x,y)=>String(y.ultimo||'').localeCompare(String(x.ultimo||'')));ADM=a}catch(e){ADM=[];AMSG='No se pudieron leer los datos. Revisa la configuración de Firebase y las reglas.'}
  try{const s=await db.collection('bloqueados').get();BANS={};s.forEach(d=>{BANS[d.id]=1})}catch(e){}
  await cargarRanking();pintarAdmin()}
 function pintarAdmin(){const b=$('aBody');b.innerHTML='';if(AMSG)b.appendChild(el('p','err',AMSG));
  if(TAB==='resumen'){const hoy=new Date().toDateString(),sum=k=>ADM.reduce((t,r)=>t+(+r[k]||0),0);
-  const it=[['👥',ADM.length,'Registrados'],['🟢',ADM.filter(r=>r.ultimo&&new Date(r.ultimo).toDateString()===hoy).length,'Activos hoy'],['🎮',ADM.filter(r=>r.partidas>0).length,'Han jugado'],['🔍',ADM.filter(r=>r.busquedas>0).length,'Han buscado'],['🏁',sum('partidas'),'Partidas totales'],['💬',sum('busquedas'),'Búsquedas totales'],['🚫',Object.keys(BANS).length,'Expulsados'],['👑',RANK[0]?RANK[0].nombre:'—','Top 1'],['👁️',VISITAS,'Dispositivos que han entrado']];
+  const it=[['👥',N(ADM.length,'reg'),'Registrados'],['🟢',N(ADM.filter(r=>r.ultimo&&new Date(r.ultimo).toDateString()===hoy).length,'hoy'),'Activos hoy'],['🎮',N(ADM.filter(r=>r.partidas>0).length,'jug'),'Han jugado'],['🔍',N(ADM.filter(r=>r.busquedas>0).length,'busq'),'Han buscado'],['🏁',N(sum('partidas'),'part'),'Partidas totales'],['💬',N(sum('busquedas'),'busqT'),'Búsquedas totales'],['🚫',Object.keys(BANS).length,'Expulsados'],['👑',RANK[0]?RANK[0].nombre:'—','Top 1'],['👁️',VISITAS,'Dispositivos que han entrado']];
   const g=el('div','stats');it.forEach(([i,v,t])=>{const c=el('div','stat'),n=el('b',null,i+' '+v);if(String(v).length>8)n.style.fontSize='1.1rem';c.append(n,el('span',null,t));g.appendChild(c)});b.appendChild(g);
   b.appendChild(el('h3',null,'🆕 Miembros recientes'));
   ADM.slice().sort((x,y)=>String(y.fecha||'').localeCompare(String(x.fecha||''))).slice(0,5).forEach(r=>{const f=el('div','feed',r.nombre+' · aula '+r.aula);f.appendChild(el('small',null,'Se unió: '+fmt(r.fecha)));b.appendChild(f)});
@@ -548,18 +565,120 @@ function abrirSheet(r){const sh=$('aSheet');sh.innerHTML='';sh.classList.remove(
  const cr=el('button','ghost','Cerrar');cr.style.marginTop='10px';cr.onclick=()=>sh.classList.add('hidden');bx.appendChild(cr)}
 function marcarTab(){document.querySelectorAll('.atabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===TAB))}
 document.querySelectorAll('.atabs button').forEach(b=>b.onclick=()=>{TAB=b.dataset.t;marcarTab();pintarAdmin()});
+/* ===== Rompecabezas de la computadora (piezas regadas) ===== */
+let PZ=null,PZC=null,PZI='';
+function pzDibujo(){
+ const c=document.createElement('canvas');c.width=c.height=600;const x=c.getContext('2d');
+ const rr=(a,b,w,h,r,f)=>{x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath();x.fillStyle=f;x.fill()};
+ const ci=(a,b,r,f)=>{x.fillStyle=f;x.beginPath();x.arc(a,b,r,0,7);x.fill()};
+ let g=x.createLinearGradient(0,0,0,600);g.addColorStop(0,'#1e3a8a');g.addColorStop(1,'#0f766e');x.fillStyle=g;x.fillRect(0,0,600,600);
+ ci(530,70,34,'#fde047');[[40,60],[90,30],[150,80],[250,40],[330,70]].forEach(p=>ci(p[0],p[1],3,'rgba(255,255,255,.85)'));
+ x.fillStyle='#8b5a2b';x.fillRect(0,440,600,160);x.fillStyle='#b9793c';x.fillRect(0,440,600,12);
+ rr(460,225,110,215,10,'#374151');rr(472,240,86,16,4,'#6b7280');rr(472,266,86,16,4,'#6b7280');
+ ci(500,405,9,'#22c55e');ci(532,405,9,'#ef4444');rr(472,330,86,40,6,'#111827');
+ rr(55,75,385,275,16,'#111827');
+ g=x.createLinearGradient(75,95,75,325);g.addColorStop(0,'#0ea5e9');g.addColorStop(1,'#6366f1');rr(75,95,345,235,6,g);
+ rr(95,115,205,150,6,'#0f172a');rr(95,115,205,22,6,'#2563eb');
+ [['#ef4444',108],['#facc15',124],['#22c55e',140]].forEach(a=>ci(a[1],126,5,a[0]));
+ const cols=['#f472b6','#34d399','#fbbf24','#60a5fa','#a78bfa'],lw=[120,80,150,60,110,90,140];
+ lw.forEach((w,i)=>{x.fillStyle=cols[i%5];x.fillRect(108+(i%3)*14,150+i*15,Math.min(w,170-(i%3)*14),7)});
+ rr(315,115,90,100,6,'#0f172a');[40,70,55,85,30].forEach((h,i)=>{x.fillStyle=cols[i];x.fillRect(325+i*15,205-h,10,h)});
+ [['#ef4444',320],['#22c55e',350],['#facc15',380]].forEach(a=>rr(a[1],225,24,24,5,a[0]));
+ x.fillStyle='#0b1220';x.fillRect(75,300,345,30);x.fillStyle='#38bdf8';x.fillRect(82,306,18,18);
+ [0,1,2,3].forEach(i=>rr(110+i*30,306,22,18,4,cols[i]));
+ x.fillStyle='#1f2937';x.fillRect(225,350,45,60);rr(160,405,175,22,8,'#1f2937');
+ rr(70,468,330,70,8,'#e5e7eb');
+ for(let r=0;r<4;r++)for(let k=0;k<12;k++){x.fillStyle=(r+k)%5===0?'#93c5fd':'#9ca3af';x.fillRect(80+k*26,476+r*15,22,11)}
+ rr(425,485,36,52,16,'#e5e7eb');x.fillStyle='#9ca3af';x.fillRect(442,487,2,18);
+ rr(485,470,44,36,6,'#f97316');x.strokeStyle='#f97316';x.lineWidth=6;x.beginPath();x.arc(533,488,10,-1.5,1.5);x.stroke();
+ return c}
+const pzFmt=ms=>{const s=Math.floor(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const PZPTS={4:30,6:80,8:150};
+function pzTrazo(x,A,B,sg,L){
+ if(!sg){x.lineTo(B[0],B[1]);return}
+ const dx=(B[0]-A[0])/L,dy=(B[1]-A[1])/L,nx=dy,ny=-dx;
+ const q=(a,b)=>[A[0]+dx*a*L+nx*sg*b*L,A[1]+dy*a*L+ny*sg*b*L];
+ let a=q(.36,0);x.lineTo(a[0],a[1]);
+ let c1=q(.42,0),c2=q(.40,.06),e=q(.38,.10);x.bezierCurveTo(c1[0],c1[1],c2[0],c2[1],e[0],e[1]);
+ c1=q(.28,.24);c2=q(.72,.24);e=q(.62,.10);x.bezierCurveTo(c1[0],c1[1],c2[0],c2[1],e[0],e[1]);
+ c1=q(.60,.06);c2=q(.58,0);e=q(.64,0);x.bezierCurveTo(c1[0],c1[1],c2[0],c2[1],e[0],e[1]);
+ x.lineTo(B[0],B[1])}
+function pzInit(){
+ if(PZ)return;
+ PZC=pzDibujo();PZI=PZC.toDataURL('image/jpeg',.92);
+ $('puz').innerHTML="<p style='color:var(--mut);margin-top:0'>Las piezas aparecen regadas abajo. Arrástralas con el dedo hasta su lugar en el cuadro de arriba: cuando encajan, se pegan solas.</p>"
+ +"<div class='pzbar' id='pzLv'><button data-n='4' class='ghost'>Medio 4×4</button><button data-n='6'>Difícil 6×6</button><button data-n='8' class='ghost'>Experto 8×8</button></div>"
+ +"<div class='pzinfo'><span id='pzM'>Piezas: 0</span><span id='pzT'>Tiempo: 0:00</span></div>"
+ +"<div id='pzB' class='jz'></div>"
+ +"<div class='pzbar'><button id='pzS' class='ghost'>🔀 Regar de nuevo</button><button id='pzV' class='ghost'>👁️ Ver imagen</button></div>"
+ +"<label style='display:block;margin:2px 0'><input type='checkbox' id='pzG' style='width:auto;margin:0 6px 0 0'>Mostrar guía (ayuda)</label>"
+ +"<img id='pzP' class='hidden' alt='Imagen completa'><p id='pzMsg' style='font-weight:600'></p>";
+ $('pzP').src=PZI;
+ document.querySelectorAll('#pzLv button').forEach(b=>b.onclick=()=>pzSet(+b.dataset.n));
+ $('pzS').onclick=()=>pzSet(PZ.n);
+ $('pzV').onclick=()=>$('pzP').classList.toggle('hidden');
+ $('pzG').onchange=()=>$('pzB').classList.toggle('guia',$('pzG').checked);
+ setInterval(()=>{if(PZ&&PZ.t0&&!PZ.done&&!$('juegos').classList.contains('hidden'))$('pzT').textContent='Tiempo: '+pzFmt(Date.now()-PZ.t0)},1000);
+ pzSet(6)}
+function pzSet(n){
+ document.querySelectorAll('#pzLv button').forEach(b=>b.classList.toggle('ghost',+b.dataset.n!==n));
+ const B=$('pzB');B.innerHTML='';B.classList.toggle('guia',$('pzG').checked);B.style.setProperty('--pzimg','url("'+PZI+'")');
+ const W=Math.max(240,Math.min(420,$('puz').clientWidth||340)),S=W,cs=S/n,t=cs*.24,pw=cs+2*t,H=Math.round(S*1.75),dpr=Math.min(2,window.devicePixelRatio||1);
+ B.style.width=W+'px';B.style.height=H+'px';
+ const bd=document.createElement('div');bd.className='jb';bd.style.width=S+'px';bd.style.height=S+'px';B.appendChild(bd);
+ const gd=document.createElement('div');gd.className='jg';gd.style.width=S+'px';gd.style.height=S+'px';B.appendChild(gd);
+ const eh=[],ev=[];
+ for(let r=0;r<n;r++){eh.push([]);ev.push([]);for(let c=0;c<n;c++){eh[r].push(Math.random()<.5?1:-1);ev[r].push(Math.random()<.5?1:-1)}}
+ const z=PZ={n,W,S,cs,t,pw,H,total:n*n,placed:0,t0:0,done:false,z:10,pieces:[]};
+ for(let r=0;r<n;r++)for(let c=0;c<n;c++){
+  const top=r>0?-ev[r-1][c]:0,bot=r<n-1?ev[r][c]:0,left=c>0?-eh[r][c-1]:0,right=c<n-1?eh[r][c]:0;
+  const cv=document.createElement('canvas');cv.width=Math.ceil(pw*dpr);cv.height=Math.ceil(pw*dpr);cv.style.width=pw+'px';cv.style.height=pw+'px';
+  const x=cv.getContext('2d');x.scale(dpr,dpr);
+  const TL=[t,t],TR=[t+cs,t],BR=[t+cs,t+cs],BL=[t,t+cs];
+  x.beginPath();x.moveTo(TL[0],TL[1]);pzTrazo(x,TL,TR,top,cs);pzTrazo(x,TR,BR,right,cs);pzTrazo(x,BR,BL,bot,cs);pzTrazo(x,BL,TL,left,cs);x.closePath();
+  x.save();x.clip();x.drawImage(PZC,-(c*cs-t),-(r*cs-t),S,S);x.restore();
+  x.lineWidth=1.4;x.strokeStyle='rgba(0,0,0,.55)';x.stroke();
+  cv.className='jp suelta';
+  const p={r,c,el:cv,tx:c*cs-t,ty:r*cs-t,x:0,y:0,lock:false};
+  p.x=Math.random()*(W-pw+t)-t/2;p.y=S+4+Math.random()*(H-S-pw-4+t);
+  pzPon(p);cv.style.zIndex=Math.floor(Math.random()*z.z);
+  pzArrastre(p);B.appendChild(cv);z.pieces.push(p)}
+ $('pzMsg').textContent='';pzCuenta()}
+function pzPon(p){p.el.style.transform='translate('+p.x+'px,'+p.y+'px)'}
+function pzCuenta(){const z=PZ;$('pzM').textContent='Piezas: '+z.placed+'/'+z.total;$('pzT').textContent='Tiempo: '+(z.t0?pzFmt((z.done?z.fin:Date.now())-z.t0):'0:00')}
+function pzArrastre(p){
+ const el=p.el;let d=null;
+ el.addEventListener('pointerdown',e=>{if(p.lock||PZ.done)return;e.preventDefault();try{el.setPointerCapture(e.pointerId)}catch(er){}
+  d={ox:e.clientX-p.x,oy:e.clientY-p.y};el.style.zIndex=++PZ.z;el.style.cursor='grabbing';if(!PZ.t0)PZ.t0=Date.now()});
+ el.addEventListener('pointermove',e=>{if(!d)return;const z=PZ;
+  p.x=Math.max(-z.t,Math.min(z.W-z.pw+z.t,e.clientX-d.ox));p.y=Math.max(-z.t,Math.min(z.H-z.pw+z.t,e.clientY-d.oy));pzPon(p)});
+ const fin=e=>{if(!d)return;d=null;el.style.cursor='';const z=PZ;
+  if(Math.hypot(p.x-p.tx,p.y-p.ty)<z.cs*.35){p.x=p.tx;p.y=p.ty;pzPon(p);p.lock=true;el.style.zIndex=1;el.classList.remove('suelta');el.style.pointerEvents='none';z.placed++;
+   if(z.placed===z.total){z.done=true;z.fin=Date.now();const pts=PZPTS[z.n];
+    $('pzMsg').textContent='🎉 ¡Lo lograste! Armaste las '+z.total+' piezas en '+pzFmt(z.fin-z.t0)+'. +'+pts+' puntos';
+    try{guardarRanking(pts)}catch(er){}try{hit('jug',1);hit('part')}catch(er){}}}
+  pzCuenta()};
+ el.addEventListener('pointerup',fin);el.addEventListener('pointercancel',fin)}
+function puzInit(){pzInit()}
 const VISITAS_API='https://countapi.mileshilliard.com/api/v1/',VISITAS_KEY='web-de-erick-erickyt2010-visitas';
 let VISITAS='…';
 function contarVisita(){try{if(localStorage.getItem('inf11_contado'))return}catch(e){return}
  fetch(VISITAS_API+'hit/'+VISITAS_KEY).then(r=>r.ok?r.json():null).then(d=>{if(d){try{localStorage.setItem('inf11_contado','1')}catch(e){}}}).catch(()=>{})}
-async function cargarVisitas(){try{const r=await fetch(VISITAS_API+'get/'+VISITAS_KEY);const d=r.ok?await r.json():null;VISITAS=d&&d.value!=null?String(d.value):'0'}catch(e){VISITAS='sin conexión'}
+const STATS={};
+const N=(real,k)=>db?real:(STATS[k]!==undefined?STATS[k]:'…');
+function hit(k,once){const f='inf11_c_'+k;try{if(once&&localStorage.getItem(f))return}catch(e){return}
+ fetch(VISITAS_API+'hit/'+VISITAS_KEY+'-'+k).then(r=>r.ok?r.json():null).then(d=>{if(d&&once){try{localStorage.setItem(f,'1')}catch(e){}}}).catch(()=>{})}
+async function cargarVisitas(){
+ const g=async s=>{try{const r=await fetch(VISITAS_API+'get/'+VISITAS_KEY+s);const d=r.ok?await r.json():null;return d&&d.value!=null?String(d.value):'0'}catch(e){return 'sin conexión'}};
+ const ks=['','-reg','-jug','-busq','-part','-busqT','-hoy-'+new Date().toISOString().slice(0,10)],v=await Promise.all(ks.map(g));
+ VISITAS=v[0];STATS.reg=v[1];STATS.jug=v[2];STATS.busq=v[3];STATS.part=v[4];STATS.busqT=v[5];STATS.hoy=v[6];
  if(!$('adminApp').classList.contains('hidden'))pintarAdmin()}
 $('passBtn').onclick=async()=>{if(!(await loginAdmin($('pass').value))){$('passErr').textContent='Contraseña incorrecta.';return}$('passErr').textContent='';$('pass').value='';$('adminApp').classList.remove('hidden');TAB='resumen';marcarTab();AMSG='Cargando…';pintarAdmin();cargarAdmin();cargarVisitas()};
 $('aSalir').onclick=async()=>{if(FBA&&DBUSER){db=DBUSER;DBUSER=null;try{await FBA.auth.signOut()}catch(e){}}$('adminApp').classList.add('hidden');$('aSheet').classList.add('hidden');const u=usuario();u?entrar(u):mostrar('reg')};
 (async()=>{
   try{localStorage.removeItem("inf11_user")}catch(e){}
   try{await iniciarDB()}catch(e){}
-  contarVisita();cargarAvisos();setInterval(cargarAvisos,30000);touch();cargarRanking();setInterval(cargarRanking,30000);
+  contarVisita();hit('hoy-'+new Date().toISOString().slice(0,10),1);cargarAvisos();setInterval(cargarAvisos,30000);touch();cargarRanking();setInterval(cargarRanking,30000);
 })();
 </script>
 </body>
