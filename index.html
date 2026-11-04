@@ -92,6 +92,12 @@ table.sheet{border-collapse:collapse;min-width:100%}
 .btnlab{position:relative;overflow:hidden;display:inline-block;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:12px 16px;cursor:pointer}
 .btnlab input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;margin:0;padding:0;border:0}
 
+
+#mantenimiento{position:fixed;inset:0;z-index:120;background:rgba(3,8,20,.94);display:flex;align-items:center;justify-content:center;padding:24px;color:#e9eefb;text-align:center}
+#mantenimiento.hidden{display:none}
+.mantCard{width:min(100%,380px);padding:26px 22px;border:1px solid #334155;border-radius:20px;background:#141c33;box-shadow:0 18px 55px #0009}
+.mantCard p{color:#cbd5e1;line-height:1.6}
+
 /* ===== Estilo profesional ===== */
 :root{--bg:#f3f6fc;--card:#ffffff;--tx:#132035;--mut:#5b6b85;--pri:#2457e6;--bd:#dbe3f1;--sh:0 6px 20px rgba(20,40,90,.08)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1020;--card:#141c33;--tx:#e9eefb;--mut:#9fb0cf;--pri:#6b94ff;--bd:#25304f;--sh:0 6px 20px rgba(0,0,0,.35)}}
@@ -298,6 +304,7 @@ button:disabled{opacity:.45;cursor:default}
   <div id="aSheet" class="hidden"></div>
 </div>
 <div id='baneado' class='hidden'><div><div style='font-size:3rem'>🚫</div><h2>Acceso suspendido</h2><p style='color:var(--mut)'>El administrador te expulsó de esta página.</p></div></div>
+<div id='mantenimiento' class='hidden' role='dialog' aria-modal='true' aria-labelledby='mantTitulo'><div class='mantCard'><div style='font-size:2.5rem'>🛠️</div><h2 id='mantTitulo'>Página en mantenimiento</h2><p>Estamos actualizando la página. Por favor, cierre la página y ábrala nuevamente para continuar.</p><button id='mantRecargar'>Entendido</button></div></div>
 
 
 <button class="ghost adm" id="admBtn">🔒 Admin</button>
@@ -552,9 +559,13 @@ function pintar(){const q=norm($('q').value.trim()),L=$('lista');L.innerHTML='';
 function mostrar(sec){["reg","contenido","admin","perfil","juegos","avisos","bienvenida"].forEach(s=>$(s).classList.toggle("hidden",s!==sec));$("menuBtn").classList.toggle("hidden",sec==="reg");$("bellBtn").classList.toggle("hidden",sec==="reg");$("menu").classList.add("hidden");if(sec==='avisos'&&SECC!=='avisos')PREV=SECC;SECC=sec;document.body.classList.toggle('dentro',sec!=='reg'&&sec!=='admin');pintarTop1()}
 function entrar(u,nuevo){
   $("hello").textContent="Hola, "+u.nombre+" · Aula "+u.aula+" 👋";racha();touch();
-  if(nuevo)$("bvTitulo").textContent="¡Bienvenido, "+u.nombre.split(" ")[0]+"!";revisarBan();mostrar(nuevo?"bienvenida":"contenido");pintar();
+  if(nuevo)$("bvTitulo").textContent="¡Bienvenido, "+u.nombre.split(" ")[0]+"!";revisarBan();mostrar(nuevo?"bienvenida":"contenido");pintar();comprobarMantenimiento();
 }
 function usuario(){try{return JSON.parse(localStorage.getItem("inf11_user"))}catch(e){return null}}
+// Incrementa APP_VERSION cada vez que publiques una actualización.
+const APP_VERSION='2026.11.04-billar-fix-1';
+function comprobarMantenimiento(){const u=usuario();if(!u||!u.nombre)return;let v='';try{v=localStorage.getItem('inf11_app_version')||''}catch(e){}if(v!==APP_VERSION){$('mantenimiento').classList.remove('hidden');$('mantRecargar').onclick=()=>{try{localStorage.setItem('inf11_app_version',APP_VERSION)}catch(e){}location.reload()}}}
+
 
 let modoLogin=false;
 const sha=async t=>[...new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t)))].map(b=>b.toString(16).padStart(2,"0")).join("");
@@ -736,6 +747,10 @@ const BLG={LW:440,LH:840,x0:20,y0:20,x1:420,y1:820,R:11,PR:22,MAXV:17};
 const BLP=[[20,20],[420,20],[20,420],[420,420],[20,820],[420,820]];
 const BLC=['#f8fafc','#f5c400','#1e40af','#dc2626','#7e22ce','#f97316','#15803d','#7f1d1d','#111111'];
 let BL=null,BLCV=null,BLX=null,BLS=1,BLM='cpu',BLL='n';
+const BL_SAVE_KEY='inf11_billar_partida_v2';
+function blGuardar(){try{if(BL){const copia={...BL,moving:false,aim:null,pk:[]};localStorage.setItem(BL_SAVE_KEY,JSON.stringify(copia))}}catch(e){}}
+function blCargar(){try{const x=JSON.parse(localStorage.getItem(BL_SAVE_KEY)||'null');if(x&&Array.isArray(x.balls)&&x.balls.length===16&&x.balls.every(a=>Number.isFinite(a.x)&&Number.isFinite(a.y))){x.moving=false;x.aim=null;x.pk=[];BL=x;BLM=x.mode||'cpu';BLL=x.lvl||'n';return true}}catch(e){}return false}
+
 const blTipo=n=>n===8?'e':(n<8?'s':'t');
 const blNom=t=>t==='s'?'lisas (1-7)':t==='t'?'rayadas (9-15)':'sin asignar';
 const blJug=i=>BL.mode==='cpu'?(i===0?'Tú':'La computadora'):('Jugador '+(i+1));
@@ -748,7 +763,7 @@ function blNew(mode,lvl){
   const n=(row===2&&i===1)?8:nums[k++];
   balls.push({n,x:220+(i-row/2)*(2*R+.6),y:300-row*(2*R*.866+.6),vx:0,vy:0,on:true,p:[0,0,1]})}
  BL={shot:0,brk:true,ang:-Math.PI/2,pw:.5,sx:0,sy:0,mode,lvl,balls,turn:0,group:[null,null],moving:false,inHand:false,over:false,pk:[],first:null,aim:null,msg:'',auto:false,sync:false};
- blUI();blDib();blSig()}
+ blUI();blDib();blGuardar();blSig()}
 let BLLAND=false;
 const blOK=()=>blHumano()&&!BL.inHand;
 function blInit(){
@@ -765,7 +780,7 @@ function blInit(){
  const abrir=()=>{o.classList.remove('hidden');try{const d=document.documentElement;d.requestFullscreen&&d.requestFullscreen().catch(()=>{})}catch(e){}blFit();blUI()};
  const cerrar=()=>{o.classList.add('hidden');try{document.fullscreenElement&&document.exitFullscreen()}catch(e){}};
  document.querySelectorAll('#blMd button').forEach(b=>b.onclick=()=>{BLM=b.dataset.m;BLL=b.dataset.l||BLL;blMarca();blNew(BLM,BLL);abrir()});
- $('blCont').onclick=()=>{if(!BL)blNew(BLM,BLL);abrir()};
+ $('blCont').onclick=()=>{if(!BL&&!blCargar())blNew(BLM,BLL);else if(BL){blUI();blDib();blSig()}abrir()};
  $('blX').onclick=cerrar;$('blNu').onclick=()=>blNew(BLM,BLL);
  addEventListener('resize',()=>{if(!o.classList.contains('hidden'))blFit()});
  BLCV.addEventListener('pointerdown',blDown);BLCV.addEventListener('pointermove',blMove);
@@ -798,7 +813,7 @@ function blFit(){
 function blSync(){const b=BL;if(!b||!$('blAngV'))return;
  const d=((b.ang*180/Math.PI+90+540)%360)-180,z=Math.abs(d)<.3;
  $('blAngV').innerHTML=(z?'0°':Math.abs(d).toFixed(1)+'°')+'<small>'+(z?'recto':d<0?'izquierda':'derecha')+'</small>';
- $('blDial').style.backgroundPositionY=(d*10)+'px';
+ const dial=$('blDial');if(dial)dial.style.backgroundPositionY=(d*10)+'px';
  $('blPwV').textContent=Math.round(b.pw*100)+'%';$('blPwM').style.height=((1-b.pw)*100)+'%';$('blPwNeedle').style.bottom=(b.pw*100)+'%';$('blCueHandle').style.top=(b.pw*100)+'%';$('blCueStick').style.top=(5+(1-b.pw)*35)+'%';blSpD()}
 function blSpD(){
  const draw=c=>{if(!c||!BL)return;const g=c.getContext('2d'),W=c.width,r=W/2-6;g.clearRect(0,0,W,W);
@@ -831,7 +846,7 @@ function blDown(e){
  if(!blHumano())return;e.preventDefault();try{BLCV.setPointerCapture(e.pointerId)}catch(er){}
  const p=blPos(e),R=BLG.R;
  if(BL.inHand){const x=Math.max(BLG.x0+R,Math.min(BLG.x1-R,p[0])),y=Math.max(BLG.y0+R,Math.min(BLG.y1-R,p[1]));
-  if(blLibre(x,y)){const c=BL.balls[0];c.x=x;c.y=y;BL.inHand=false;BL.msg='';blUI()}blDib();return}
+  if(blLibre(x,y)){const c=BL.balls[0];c.x=x;c.y=y;BL.inHand=false;BL.msg='';blUI();blGuardar()}blDib();return}
  const tb=BL.balls.find(o=>o.on&&o.n!==0&&Math.hypot(o.x-p[0],o.y-p[1])<R*1.7);
  if(tb){BL.aim=2;const c=BL.balls[0];BL.ang=Math.atan2(tb.y-c.y,tb.x-c.x);blSync();blDib();return}
  BL.aim=1;blApunta(p)}
@@ -891,13 +906,13 @@ function blFin(){
  const falloDelSaque=brk&&!scratch&&pk.length===0;
  b.inHand=falta||falloDelSaque;if(sigue)b.shot=(b.shot||0)+1;else{b.turn=op;b.shot=0}
  b.msg=(brk&&pk.length?'Al romper no cuenta ninguna bola. ':'')+(asig?blJug(me)+' va con '+(b.group[me]==='s'?'lisas':'rayadas')+'. ':'')+(falta?'Falta: '+motivo+'. ':'')+(falloDelSaque?'Falló el saque: '+blJug(b.turn)+' puede colocar la blanca donde quiera. ':'')+(b.inHand&&!falloDelSaque?blJug(b.turn)+' coloca la blanca donde quiera.':(sigue?'Sigue tirando '+blJug(me)+'.':'Turno de '+blJug(b.turn)+'.'));
- b.pk=[];b.first=null;blUI();blDib();blSig()}
+ b.pk=[];b.first=null;blUI();blDib();blGuardar();blSig()}
 function blRepon8(){const R=BLG.R,e=BL.balls.find(x=>x.n===8);e.on=false;let y=300-2*(2*R*.866+.6);for(let k=0;k<20&&!(e.x=220,e.y=y,blLibre(220,y));k++)y-=2*R+1;e.x=220;e.y=y;e.vx=e.vy=0;e.on=true}
 function blGana(w,txt){
  const b=BL;b.over=true;b.pk=[];
  b.msg='🏆 '+txt+'. ¡Gana '+(b.mode==='cpu'?(w===0?'Tú':'la computadora'):'el Jugador '+(w+1))+'!';
  if(b.mode==='cpu'&&w===0&&!b.auto){const pts={f:10,n:25,d:50}[b.lvl]||25;b.msg+=' +'+pts+' puntos';try{guardarRanking(pts)}catch(e){}try{hit('jug',1);hit('part')}catch(e){}}
- blUI();blDib()}
+ blUI();blDib();blGuardar()}
 function blSig(){const ref=BL;if(!ref||ref.over||ref.sync||!blCPU())return;setTimeout(()=>{if(BL===ref)blIA()},ref.auto?10:1000)}
 function blColocaAuto(){
  const c=BL.balls[0];
