@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<title>Informática 11no grado</title>
+<title>Informática 11no grado | Web de Erick y Yali</title>
 <style>
 :root{--bg:#f4f6fb;--card:#fff;--tx:#1b2330;--mut:#5d6b82;--pri:#2f6bff;--bd:#dde3ee;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10141c;--card:#1a212d;--tx:#e8edf6;--mut:#9aa8bf;--pri:#6c97ff;--bd:#2b3445}}
@@ -204,6 +204,7 @@ button:disabled{opacity:.45;cursor:default}
 <div id="loader"><div><div class="logo"><i></i><i></i><i></i><i></i></div><p>Cargando…</p></div></div>
 <header>
   <h1>💻 Informática · 11no grado</h1>
+  <p style="margin:4px 0 8px;color:var(--mut);font-weight:700">Web de Erick y Yali</p>
   <p id="hello">Bienvenido al grupo</p>
   <button class='ghost menuBtn hidden' id='menuBtn' aria-label='Menú'>⋮</button>
   <button class='ghost bell hidden' id='bellBtn' aria-label='Notificaciones'>🔔<span id='badge' class='hidden'>0</span></button>
@@ -666,31 +667,23 @@ function abrirSheet(r){const sh=$('aSheet');sh.innerHTML='';sh.classList.remove(
 function marcarTab(){document.querySelectorAll('.atabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===TAB))}
 document.querySelectorAll('.atabs button').forEach(b=>b.onclick=()=>{TAB=b.dataset.t;marcarTab();pintarAdmin()});
 /* ===== Rompecabezas de la computadora (piezas regadas) ===== */
-let PZ=null,PZC=null,PZI='';
-function pzDibujo(){
+let PZ=null,PZC=null,PZI='',PZ_INDEX=0,PZ_IMAGES=[],PZ_NAMES=['Computadora de escritorio','Laptop','Teclado','Ratón','CPU','Red informática'];
+function pzDibujo(tipo=0){
  const c=document.createElement('canvas');c.width=c.height=600;const x=c.getContext('2d');
  const rr=(a,b,w,h,r,f)=>{x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath();x.fillStyle=f;x.fill()};
- const ci=(a,b,r,f)=>{x.fillStyle=f;x.beginPath();x.arc(a,b,r,0,7);x.fill()};
- let g=x.createLinearGradient(0,0,0,600);g.addColorStop(0,'#1e3a8a');g.addColorStop(1,'#0f766e');x.fillStyle=g;x.fillRect(0,0,600,600);
- ci(530,70,34,'#fde047');[[40,60],[90,30],[150,80],[250,40],[330,70]].forEach(p=>ci(p[0],p[1],3,'rgba(255,255,255,.85)'));
- x.fillStyle='#8b5a2b';x.fillRect(0,440,600,160);x.fillStyle='#b9793c';x.fillRect(0,440,600,12);
- rr(460,225,110,215,10,'#374151');rr(472,240,86,16,4,'#6b7280');rr(472,266,86,16,4,'#6b7280');
- ci(500,405,9,'#22c55e');ci(532,405,9,'#ef4444');rr(472,330,86,40,6,'#111827');
- rr(55,75,385,275,16,'#111827');
- g=x.createLinearGradient(75,95,75,325);g.addColorStop(0,'#0ea5e9');g.addColorStop(1,'#6366f1');rr(75,95,345,235,6,g);
- rr(95,115,205,150,6,'#0f172a');rr(95,115,205,22,6,'#2563eb');
- [['#ef4444',108],['#facc15',124],['#22c55e',140]].forEach(a=>ci(a[1],126,5,a[0]));
- const cols=['#f472b6','#34d399','#fbbf24','#60a5fa','#a78bfa'],lw=[120,80,150,60,110,90,140];
- lw.forEach((w,i)=>{x.fillStyle=cols[i%5];x.fillRect(108+(i%3)*14,150+i*15,Math.min(w,170-(i%3)*14),7)});
- rr(315,115,90,100,6,'#0f172a');[40,70,55,85,30].forEach((h,i)=>{x.fillStyle=cols[i];x.fillRect(325+i*15,205-h,10,h)});
- [['#ef4444',320],['#22c55e',350],['#facc15',380]].forEach(a=>rr(a[1],225,24,24,5,a[0]));
- x.fillStyle='#0b1220';x.fillRect(75,300,345,30);x.fillStyle='#38bdf8';x.fillRect(82,306,18,18);
- [0,1,2,3].forEach(i=>rr(110+i*30,306,22,18,4,cols[i]));
- x.fillStyle='#1f2937';x.fillRect(225,350,45,60);rr(160,405,175,22,8,'#1f2937');
- rr(70,468,330,70,8,'#e5e7eb');
- for(let r=0;r<4;r++)for(let k=0;k<12;k++){x.fillStyle=(r+k)%5===0?'#93c5fd':'#9ca3af';x.fillRect(80+k*26,476+r*15,22,11)}
- rr(425,485,36,52,16,'#e5e7eb');x.fillStyle='#9ca3af';x.fillRect(442,487,2,18);
- rr(485,470,44,36,6,'#f97316');x.strokeStyle='#f97316';x.lineWidth=6;x.beginPath();x.arc(533,488,10,-1.5,1.5);x.stroke();
+ const ci=(a,b,r,f)=>{x.fillStyle=f;x.beginPath();x.arc(a,b,r,0,Math.PI*2);x.fill()};
+ const bg=[['#1e3a8a','#0f766e'],['#581c87','#1d4ed8'],['#0f766e','#164e63'],['#7c2d12','#7f1d1d'],['#312e81','#701a75'],['#064e3b','#1e40af']][tipo];
+ let g=x.createLinearGradient(0,0,600,600);g.addColorStop(0,bg[0]);g.addColorStop(1,bg[1]);x.fillStyle=g;x.fillRect(0,0,600,600);
+ for(let i=0;i<35;i++)ci((i*97)%600,(i*157)%600,2+(i%3),'rgba(255,255,255,.35)');
+ const title=PZ_NAMES[tipo];
+ if(tipo===0){rr(95,85,410,300,22,'#111827');rr(115,105,370,255,10,'#38bdf8');rr(220,385,160,70,10,'#374151');rr(165,450,270,24,12,'#cbd5e1');rr(150,485,300,72,10,'#e5e7eb');for(let r=0;r<3;r++)for(let k=0;k<12;k++)rr(163+k*23,495+r*17,18,11,3,(r+k)%3?'#64748b':'#38bdf8');ci(475,330,9,'#22c55e')}
+ if(tipo===1){rr(75,130,450,285,22,'#111827');rr(92,148,416,235,10,'#7dd3fc');rr(45,420,510,35,12,'#cbd5e1');rr(185,455,230,18,8,'#64748b');rr(225,185,150,115,12,'#1e3a8a');ci(300,240,35,'#facc15');rr(275,290,50,8,4,'#f8fafc')}
+ if(tipo===2){rr(70,145,460,310,24,'#cbd5e1');rr(88,163,424,274,16,'#334155');for(let r=0;r<5;r++)for(let k=0;k<13;k++)rr(102+k*30,180+r*48,24,34,5,(r+k)%4===0?'#38bdf8':'#e2e8f0');rr(205,420,190,22,8,'#94a3b8');}
+ if(tipo===3){x.save();x.translate(300,300);x.rotate(-.18);rr(-105,-175,210,350,100,'#e2e8f0');rr(-12,-170,24,125,10,'#64748b');x.strokeStyle='#64748b';x.lineWidth=5;x.beginPath();x.moveTo(0,-40);x.lineTo(0,30);x.stroke();rr(-8,70,16,55,8,'#38bdf8');x.restore();
+  x.strokeStyle='rgba(255,255,255,.7)';x.lineWidth=8;x.beginPath();x.arc(300,300,190,-2.2,-.8);x.stroke()}
+ if(tipo===4){rr(155,95,290,410,26,'#111827');rr(180,125,240,120,12,'#334155');for(let i=0;i<4;i++)ci(220+i*55,185,15,['#22c55e','#38bdf8','#facc15','#ef4444'][i]);rr(190,280,220,175,12,'#475569');for(let r=0;r<4;r++)for(let k=0;k<4;k++)rr(210+k*48,300+r*34,35,22,5,(r+k)%3?'#94a3b8':'#38bdf8');}
+ if(tipo===5){for(let i=0;i<6;i++){const a=i*Math.PI/3;ci(300+170*Math.cos(a),280+150*Math.sin(a),38,'#dbeafe');x.strokeStyle='#a7f3d0';x.lineWidth=9;x.beginPath();x.moveTo(300,280);x.lineTo(300+170*Math.cos(a),280+150*Math.sin(a));x.stroke();ci(300+170*Math.cos(a),280+150*Math.sin(a),19,'#2563eb')}ci(300,280,65,'#facc15');ci(300,280,28,'#1e3a8a');}
+ rr(55,515,490,55,14,'rgba(15,23,42,.82)');x.fillStyle='#fff';x.font='bold 27px Arial';x.textAlign='center';x.fillText(title,300,551);
  return c}
 const pzFmt=ms=>{const s=Math.floor(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 const PZPTS={4:30,6:80,8:150};
@@ -705,8 +698,9 @@ function pzTrazo(x,A,B,sg,L){
  x.lineTo(B[0],B[1])}
 function pzInit(){
  if(PZ)return;
- PZC=pzDibujo();PZI=PZC.toDataURL('image/jpeg',.92);
- $('puz').innerHTML="<p style='color:var(--mut);margin-top:0'>Las piezas aparecen regadas abajo. Arrástralas con el dedo hasta su lugar en el cuadro de arriba: cuando encajan, se pegan solas.</p>"
+ PZ_IMAGES=PZ_NAMES.map((_,i)=>pzDibujo(i));PZ_INDEX=0;PZC=PZ_IMAGES[PZ_INDEX];PZI=PZC.toDataURL('image/jpeg',.92);
+ $('puz').innerHTML="<p style='color:var(--mut);margin-top:0'>Elige uno de los seis rompecabezas y arrastra las piezas hasta completar la imagen.</p>"
+ +"<div class='pzbar' id='pzThemes'>"+PZ_NAMES.map((n,i)=>"<button data-img='"+i+"' class='ghost'>"+(i+1)+". "+n+"</button>").join('')+"</div>"
  +"<div class='pzbar' id='pzLv'><button data-n='4' class='ghost'>Medio 4×4</button><button data-n='6'>Difícil 6×6</button><button data-n='8' class='ghost'>Experto 8×8</button></div>"
  +"<div class='pzinfo'><span id='pzM'>Piezas: 0</span><span id='pzT'>Tiempo: 0:00</span></div>"
  +"<div id='pzB' class='jz'></div>"
@@ -714,6 +708,8 @@ function pzInit(){
  +"<label style='display:block;margin:2px 0'><input type='checkbox' id='pzG' style='width:auto;margin:0 6px 0 0'>Mostrar guía (ayuda)</label>"
  +"<img id='pzP' class='hidden' alt='Imagen completa'><p id='pzMsg' style='font-weight:600'></p>";
  $('pzP').src=PZI;
+ document.querySelectorAll('#pzThemes button').forEach(b=>b.onclick=()=>{PZ_INDEX=+b.dataset.img;PZC=PZ_IMAGES[PZ_INDEX];PZI=PZC.toDataURL('image/jpeg',.92);$('pzP').src=PZI;document.querySelectorAll('#pzThemes button').forEach(q=>q.classList.toggle('ghost',+q.dataset.img!==PZ_INDEX));pzSet(PZ?PZ.n:6)});
+ document.querySelectorAll('#pzThemes button').forEach(b=>b.classList.toggle('ghost',+b.dataset.img!==PZ_INDEX));
  document.querySelectorAll('#pzLv button').forEach(b=>b.onclick=()=>pzSet(+b.dataset.n));
  $('pzS').onclick=()=>pzSet(PZ.n);
  $('pzV').onclick=()=>$('pzP').classList.toggle('hidden');
