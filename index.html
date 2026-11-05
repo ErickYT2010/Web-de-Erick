@@ -173,11 +173,14 @@ button:disabled{opacity:.45;cursor:default}
 .jch .n{display:flex;justify-content:space-between;font-size:.72rem;font-weight:700;white-space:nowrap}
 .jch .n i{font-style:normal;color:#facc15}
 .jch .d{height:13px;font-size:.62rem;color:#94a3b8;white-space:nowrap;overflow:hidden}
+.jch .result{display:inline-block;margin-left:5px;padding:2px 5px;border-radius:5px;font-size:.58rem;font-weight:1000;letter-spacing:.4px;vertical-align:middle}
+.jch .result.win{background:#14532d;color:#86efac;border:1px solid #22c55e}
+.jch .result.lose{background:#7f1d1d;color:#fecaca;border:1px solid #ef4444}
 .md{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:2px;vertical-align:middle;border:1px solid rgba(255,255,255,.45)}
 #blMsgW{height:22px;flex:none;text-align:center;font-size:.78rem;color:#94a3b8;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 8px}
 #blEst{color:#fff;margin-right:6px}
 
-/* Controles de billar: taco de potencia, medidor y selector ampliado de efecto */
+/* Controles de billar: fuerza y ajuste fino de dirección */
 #blL{width:58px;gap:8px}
 #blCueLabel,#blR>small{font-size:.62rem;letter-spacing:.08em;color:#cbd5e1;font-weight:800}
 #blCueTrack{position:relative;width:46px;flex:1;max-height:310px;min-height:130px;border-radius:22px;border:2px solid #64748b;background:linear-gradient(90deg,#111827,#334155 48%,#0f172a);touch-action:none;box-shadow:inset 0 0 10px #000;overflow:hidden}
@@ -185,19 +188,15 @@ button:disabled{opacity:.45;cursor:default}
 #blCueStick{position:absolute;left:50%;top:5%;height:90%;width:7px;transform:translateX(-50%);border-radius:8px;background:linear-gradient(90deg,#7c4a22,#f0c78b 45%,#9a5b2a);box-shadow:0 0 5px #000}
 #blCueHandle{position:absolute;left:3px;right:3px;top:50%;height:26px;transform:translateY(-50%);border:2px solid #f8fafc;border-radius:8px;background:linear-gradient(#64748b,#1e293b);box-shadow:0 2px 8px #000}
 #blCueHint{font-size:.58rem;color:#94a3b8;text-align:center}
-#blR{width:64px;gap:5px}
-#blSpOpen{width:58px;height:58px;padding:3px;border-radius:50%;background:#16213a;border:2px solid #64748b;display:grid;place-items:center}
-#blSpIcon{width:48px;height:48px;pointer-events:none}
+#blR{width:76px;gap:7px}
+#blFine{display:flex;flex-direction:column;align-items:center;gap:7px;width:100%}
+#blFine small{font-size:.58rem;color:#94a3b8;text-align:center}
+.blFineBtns{display:flex;gap:5px;width:100%}
+.blFineBtns button{flex:1;min-width:0;padding:10px 0;border:1px solid #64748b;border-radius:10px;background:#16213a;color:#fff;font-size:1.2rem;font-weight:900;touch-action: manipulation}
+#blFineVal{font-size:.68rem;color:#e2e8f0;font-weight:800}
 #blPwBar{width:27px;max-height:310px;background:linear-gradient(to top,#22c55e 0%,#facc15 55%,#ef4444 100%)}
 #blPwM{background:rgba(11,18,32,.62)}
 #blPwNeedle{position:absolute;left:-3px;right:-3px;height:3px;background:#fff;box-shadow:0 0 5px #fff;bottom:50%;pointer-events:none}
-#blSpinModal{position:absolute;inset:0;z-index:10;background:rgba(2,6,23,.88);display:flex;align-items:center;justify-content:center;padding:18px}
-#blSpinModal.hidden{display:none}
-#blSpinCard{display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px 18px;border:1px solid #475569;border-radius:18px;background:#111c30;box-shadow:0 12px 40px #0009;max-width: min(90vw,360px);width:100%;text-align:center}
-#blSpinCard b{font-size:1rem}
-#blSp{width:min(66vw,260px);height:auto;aspect-ratio:1;border-radius:50%;background:#f8fafc;touch-action:none}
-#blSpinCard small{font-size:.75rem;color:#cbd5e1}
-#blSpinDone{width:100%;padding:12px;border-radius:10px;background:#2563eb;color:white;border:0;font-weight:800}
 @media(max-height:520px){#blCueTrack,#blPwBar{min-height:90px;max-height:220px}#blSpinCard{padding:10px}#blSp{width:min(48vh,210px)}}
 </style>
 </head>
@@ -212,6 +211,7 @@ button:disabled{opacity:.45;cursor:default}
     <button data-v='perfil'>👤 Perfil</button>
     <button data-v='contenido'>📚 Información</button>
     <button data-v='juegos'>🎮 Juegos</button>
+    <button data-v='sugerencias'>💡 Buzón de sugerencias</button>
   </div>
 </header>
 <main>
@@ -263,6 +263,14 @@ button:disabled{opacity:.45;cursor:default}
     <div class='card hidden' id='jc-rank'><h2 style='margin-top:0'>🏆 Ranking</h2><p style='color:var(--mut);margin-top:0'>Cada acierto vale 10 puntos. Si haces 10/10, ¡+20 de bonus! Los puntos se acumulan.</p><div id='rank'></div></div>
   </section>
 
+  <section id='sugerencias' class='hidden'>
+    <div class='card'><h2 style='margin-top:0'>💡 Buzón de sugerencias</h2>
+      <p style='color:var(--mut)'>¿Qué te gustaría que añadamos o mejoremos en la página? Tu idea llegará al administrador.</p>
+      <textarea id='sugTexto' maxlength='500' placeholder='Escribe tu sugerencia…' style='width:100%;min-height:120px;box-sizing:border-box'></textarea>
+      <button id='sugEnviar' style='margin-top:8px'>📨 Enviar sugerencia</button><p id='sugEstado' class='err'></p>
+      <button class='ghost' id='sugVolver'>← Volver</button>
+    </div>
+  </section>
   <section id='avisos' class='hidden'>
     <div class='card'><h2 style='margin-top:0'>🔔 Notificaciones</h2><div id='avList'></div><p><button class='ghost' id='avBack'>← Volver</button></p></div>
   </section>
@@ -299,6 +307,7 @@ button:disabled{opacity:.45;cursor:default}
     <button data-t="resumen" class="on">📊<small>Resumen</small></button>
     <button data-t="actividad">🔔<small>Actividad</small></button>
     <button data-t="miembros">👥<small>Miembros</small></button>
+    <button data-t="sugerencias">💡<small>Ideas</small></button>
     <button data-t="perfil">👤<small>Perfil</small></button>
   </nav>
   <div id="aSheet" class="hidden"></div>
@@ -505,6 +514,8 @@ $('menuBtn').onclick=e=>{e.stopPropagation();$('menu').classList.toggle('hidden'
 document.addEventListener('click',()=>$('menu').classList.add('hidden'));
 document.querySelectorAll('#menu button').forEach(b=>b.onclick=()=>{if(b.dataset.v==='perfil')pintarPerfil();if(b.dataset.v==='juegos'){iniciarQuiz();puzInit();cargarRanking()}if(b.dataset.v==='contenido'){CAT='';$('q').value='';pintar()}mostrar(b.dataset.v);if(b.dataset.v==='juegos')juegoTab(JT)});
 $('avBack').onclick=()=>mostrar(PREV||'contenido');
+$('sugVolver').onclick=()=>mostrar('contenido');
+$('sugEnviar').onclick=async()=>{const msg=$('sugTexto').value.trim(),st=$('sugEstado'),u=usuario();if(!msg){st.textContent='Escribe tu idea antes de enviarla.';return}if(!db||!uid){st.textContent='Para enviar sugerencias, la página debe estar conectada a la base de datos.';return}const btn=$('sugEnviar');btn.disabled=true;st.textContent='Enviando…';try{const id=uid+'_'+Date.now();await db.collection('sugerencias').doc(id).set({uid,nombre:u?.nombre||'Alumno',aula:u?.aula||'',texto:msg,fecha:new Date().toISOString(),estado:'Nueva'});$('sugTexto').value='';st.textContent='✅ ¡Sugerencia enviada! Gracias por ayudar a mejorar la página.'}catch(e){st.textContent='No se pudo enviar. Comprueba la conexión.'}btn.disabled=false};
 function mejor(){try{return +localStorage.getItem('inf11_best')||0}catch(e){return 0}}
 function pintarPerfil(){const u=usuario()||{nombre:'',aula:''};$('pNom').textContent=u.nombre;$('pAula').textContent=u.aula;$('pBest').textContent=mejor()+' / 10';$('pRacha').textContent=racha()+' día(s)';$('pFotoBox').replaceChildren(av(miFoto(),u.nombre,84))}
 const PREG=[
@@ -556,7 +567,7 @@ function pintar(){const q=norm($('q').value.trim()),L=$('lista');L.innerHTML='';
  if(!q)r=r.filter(x=>x.c===CAT);
  if(!q){const b=el('button','ghost','← Categorías');b.onclick=()=>{CAT='';pintar()};L.appendChild(b)}
  const w=document.createElement('div');w.innerHTML=r.length?r.map(x=>`<details><summary>${x.t}<span class="tag">${x.c}</span></summary>${x.h}</details>`).join(''):"<p style='color:var(--mut)'>No encontré nada con esa búsqueda 🤔</p>";L.appendChild(w)}
-function mostrar(sec){["reg","contenido","admin","perfil","juegos","avisos","bienvenida"].forEach(s=>$(s).classList.toggle("hidden",s!==sec));$("menuBtn").classList.toggle("hidden",sec==="reg");$("bellBtn").classList.toggle("hidden",sec==="reg");$("menu").classList.add("hidden");if(sec==='avisos'&&SECC!=='avisos')PREV=SECC;SECC=sec;document.body.classList.toggle('dentro',sec!=='reg'&&sec!=='admin');pintarTop1()}
+function mostrar(sec){["reg","contenido","admin","perfil","juegos","avisos","sugerencias","bienvenida"].forEach(s=>$(s).classList.toggle("hidden",s!==sec));$("menuBtn").classList.toggle("hidden",sec==="reg");$("bellBtn").classList.toggle("hidden",sec==="reg");$("menu").classList.add("hidden");if(sec==='avisos'&&SECC!=='avisos')PREV=SECC;SECC=sec;document.body.classList.toggle('dentro',sec!=='reg'&&sec!=='admin');pintarTop1()}
 function entrar(u,nuevo){
   $("hello").textContent="Hola, "+u.nombre+" · Aula "+u.aula+" 👋";racha();touch();
   if(nuevo)$("bvTitulo").textContent="¡Bienvenido, "+u.nombre.split(" ")[0]+"!";revisarBan();mostrar(nuevo?"bienvenida":"contenido");pintar();comprobarMantenimiento();
@@ -600,7 +611,7 @@ $("back").onclick=()=>{const u=usuario();u?entrar(u):mostrar("reg")};
 function cont(k){let n=0;try{n=(+localStorage.getItem(k)||0)+1;localStorage.setItem(k,n)}catch(e){n=1}return n}
 async function act(o){if(!db||!uid)return;try{await db.collection('registros').doc(uid).update(o)}catch(e){}}
 async function revisarBan(){if(!db||!uid)return;try{const d=await db.collection('bloqueados').doc(uid).get();const x=d.data&&d.data();if(x&&x.f){try{localStorage.removeItem('inf11_user')}catch(e){}$('baneado').classList.remove('hidden')}}catch(e){}}
-let ADM=[],BANS={},TAB='resumen',AMSG='';
+let ADM=[],BANS={},SUG=[],TAB='resumen',AMSG='';
 const fmt=t=>{if(!t)return '—';const d=new Date(t);return d.toLocaleDateString('es',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})};
 const fotoDe=r=>{const k=RANK.find(x=>x.uid===r.uid||(x.nombre===r.nombre&&x.aula===r.aula));return k?k.foto:''};
 async function enviarTexto(r,t){const ref=db.collection('avisos').doc(r.uid);let l=[];try{const s=await ref.get();const d=s.data&&s.data();if(d&&d.lista)l=d.lista}catch(e){}l.push({t,f:new Date().toISOString()});await ref.set({lista:l.slice(-30)})}
@@ -608,6 +619,7 @@ async function cargarAdmin(){AMSG='';
  if(!db){AMSG='Modo sin base de datos: se muestran solo totales, sin nombres.';pintarAdmin();return}
  try{const s=await db.collection('registros').get();const a=[];s.forEach(d=>{const x=d.data();x.uid=x.uid||d.id;a.push(x)});a.sort((x,y)=>String(y.ultimo||'').localeCompare(String(x.ultimo||'')));ADM=a}catch(e){ADM=[];AMSG='No se pudieron leer los datos. Revisa la configuración de Firebase y las reglas.'}
  try{const s=await db.collection('bloqueados').get();BANS={};s.forEach(d=>{BANS[d.id]=1})}catch(e){}
+ try{const s=await db.collection('sugerencias').get();SUG=[];s.forEach(d=>{const x=d.data();x.id=d.id;SUG.push(x)});SUG.sort((a,b)=>String(b.fecha||'').localeCompare(String(a.fecha||'')))}catch(e){SUG=[]}
  await cargarRanking();pintarAdmin()}
 function pintarAdmin(){const b=$('aBody');b.innerHTML='';if(AMSG)b.appendChild(el('p','err',AMSG));
  if(TAB==='resumen'){const hoy=new Date().toDateString(),sum=k=>ADM.reduce((t,r)=>t+(+r[k]||0),0);
@@ -616,9 +628,19 @@ function pintarAdmin(){const b=$('aBody');b.innerHTML='';if(AMSG)b.appendChild(e
   b.appendChild(el('h3',null,'🆕 Miembros recientes'));
   ADM.slice().sort((x,y)=>String(y.fecha||'').localeCompare(String(x.fecha||''))).slice(0,5).forEach(r=>{const f=el('div','feed',r.nombre+' · aula '+r.aula);f.appendChild(el('small',null,'Se unió: '+fmt(r.fecha)));b.appendChild(f)});
   if(!ADM.length)b.appendChild(el('p',null,'Aún no hay miembros.'))}
- else if(TAB==='actividad'){const ev=[];ADM.forEach(r=>{if(r.fecha)ev.push([r.fecha,'🆕 '+r.nombre+' (aula '+r.aula+') se unió a la página']);if(r.ultPartidaF)ev.push([r.ultPartidaF,'🎮 '+r.nombre+' jugó y sacó '+r.ultPartida+'/10']);if(r.ultBusqF)ev.push([r.ultBusqF,'🔍 '+r.nombre+' buscó «'+r.ultBusq+'»'])});
+ else if(TAB==='actividad'){
+  const up=el('div','card');up.appendChild(el('h3',null,'📢 Publicar actualización'));
+  up.appendChild(el('p',null,'Envía un aviso a la campanita de todos los miembros registrados. Ejemplo: «🧩 Se ha añadido un nuevo rompecabezas».'));
+  const ta=document.createElement('textarea');ta.id='avisoActualizacion';ta.placeholder='Escribe qué se ha actualizado…';ta.maxLength=240;ta.style.cssText='width:100%;min-height:85px;box-sizing:border-box';up.appendChild(ta);
+  const sugQuick=el('button','ghost','💡 Avisar que ya pueden enviar sugerencias');sugQuick.style.marginTop='8px';sugQuick.onclick=()=>{ta.value='🔔 ¡Actualización de la web! Ahora puedes enviar sugerencias sobre qué te gustaría que añadamos o mejoremos. Entra en el menú y abre «Buzón de sugerencias».'};up.appendChild(sugQuick);
+  const send=el('button',null,'🔔 Notificar a todos');send.style.marginTop='8px';
+  const status=el('p','', '');status.style.cssText='font-size:.9rem;color:var(--mut);margin-bottom:0';
+  send.onclick=async()=>{const msg=ta.value.trim();if(!msg){status.textContent='Escribe primero qué se ha actualizado.';return}if(!db){status.textContent='No hay conexión con la base de datos. Configúrala para enviar avisos.';return}const dest=ADM.filter(x=>x.uid&&!BANS[x.uid]);if(!dest.length){status.textContent='No hay miembros disponibles para notificar.';return}send.disabled=true;status.textContent='Enviando notificación…';let ok=0;for(const r of dest){try{await enviarTexto(r,msg);ok++}catch(e){}}status.textContent=ok?'✅ Notificación enviada a '+ok+' de '+dest.length+' miembro(s).':'No se pudo enviar. Revisa la conexión y las reglas de la base de datos.';send.disabled=false;if(ok)ta.value=''};
+  up.appendChild(send);up.appendChild(status);b.appendChild(up);
+  const ev=[];ADM.forEach(r=>{if(r.fecha)ev.push([r.fecha,'🆕 '+r.nombre+' (aula '+r.aula+') se unió a la página']);if(r.ultPartidaF)ev.push([r.ultPartidaF,'🎮 '+r.nombre+' jugó y sacó '+r.ultPartida+'/10']);if(r.ultBusqF)ev.push([r.ultBusqF,'🔍 '+r.nombre+' buscó «'+r.ultBusq+'»'])});
   ev.sort((x,y)=>String(y[0]).localeCompare(String(x[0])));b.appendChild(el('h3',null,'🔔 Actividad reciente'));
   if(!ev.length)b.appendChild(el('p',null,'Sin actividad todavía.'));ev.slice(0,40).forEach(([t,x])=>{const f=el('div','feed',x);f.appendChild(el('small',null,fmt(t)));b.appendChild(f)})}
+ else if(TAB==='sugerencias'){b.appendChild(el('h3',null,'💡 Sugerencias de los alumnos'));const pendientes=SUG.filter(x=>x.estado!=='Revisada');b.appendChild(el('p',null,'Total: '+SUG.length+' · Nuevas: '+pendientes.length));if(!SUG.length)b.appendChild(el('p',null,'Todavía no han enviado sugerencias.'));SUG.forEach(x=>{const c=el('div','feed');c.appendChild(el('b',null,(x.nombre||'Alumno')+' · aula '+(x.aula||'—')));c.appendChild(el('p',null,x.texto||''));c.appendChild(el('small',null,fmt(x.fecha)+' · '+(x.estado||'Nueva')));if(x.estado!=='Revisada'){const done=el('button','ghost','✓ Marcar como revisada');done.style.marginTop='8px';done.onclick=async()=>{try{await db.collection('sugerencias').doc(x.id).update({estado:'Revisada'});x.estado='Revisada';pintarAdmin()}catch(e){alert('No se pudo actualizar el estado.')}};c.appendChild(done)}b.appendChild(c)})}
  else if(TAB==='miembros'){const bt=el('button',null,'✉️ Enviar a todos');bt.style.marginBottom='12px';bt.onclick=()=>abrirSheet(null);b.appendChild(bt);
   if(!ADM.length)b.appendChild(el('p',null,'Aún no hay miembros.'));
   ADM.forEach(r=>{const m=el('div','mem'),inf=el('div');inf.style.flex='1';inf.appendChild(el('b',null,r.nombre));const d=el('div',null,'Aula '+r.aula+' · '+fmt(r.ultimo));d.style.cssText='color:var(--mut);font-size:.85rem';inf.appendChild(d);m.append(av(fotoDe(r),r.nombre,42),inf);if(BANS[r.uid])m.appendChild(el('span',null,'🚫'));m.onclick=()=>abrirSheet(r);b.appendChild(m)})}
@@ -768,13 +790,13 @@ let BLLAND=false;
 const blOK=()=>blHumano()&&!BL.inHand;
 function blInit(){
  if(BLCV){blMarca();return}
- $('bil').innerHTML="<p style='color:var(--mut);margin-top:0'>Elige cómo jugar. Se abre en pantalla completa, con la mesa grande, placa de dirección, fuerza y efecto.</p><div class='pzbar' id='blMd'><button data-m='cpu' data-l='f' class='ghost'>Vs PC fácil</button><button data-m='cpu' data-l='n'>Vs PC normal</button><button data-m='cpu' data-l='d' class='ghost'>Vs PC difícil</button><button data-m='2p' class='ghost'>2 jugadores</button></div><button id='blCont' class='ghost' style='width:100%;margin-top:8px'>▶ Continuar partida</button>";
+ $('bil').innerHTML="<p style='color:var(--mut);margin-top:0'>Elige cómo jugar. Se abre en pantalla completa, con la mesa grande, dirección precisa y control de fuerza.</p><div class='pzbar' id='blMd'><button data-m='cpu' data-l='f' class='ghost'>Vs PC fácil</button><button data-m='cpu' data-l='n'>Vs PC normal</button><button data-m='cpu' data-l='d' class='ghost'>Vs PC difícil</button><button data-m='2p' class='ghost'>2 jugadores</button></div><button id='blCont' class='ghost' style='width:100%;margin-top:8px'>▶ Continuar partida</button>";
  const o=document.createElement('div');o.id='blFS';o.className='hidden';
  o.innerHTML=`<div id='blTop'><button class='ghost' id='blX'>✕</button><div id='blJ'></div><button class='ghost' id='blNu'>🔄</button></div><div id='blMsgW'><b id='blEst'></b><span id='blMsg'></span></div>
  <div id='blMain'><div id='blL'><div id='blAngV'></div><div id='blCueLabel'>FUERZA</div><div id='blCueTrack' aria-label='Arrastra el taco hacia abajo para aumentar la fuerza'><div id='blCueStick'></div><div id='blCueHandle'></div></div><small id='blCueHint'>Arrastra ↓</small></div>
  <div id='blMid'><canvas id='blCv'></canvas></div>
- <div id='blR'><button id='blSpOpen' class='ghost' aria-label='Elegir punto de impacto'><canvas id='blSpIcon' width='100' height='100'></canvas></button><small>EFECTO</small><div id='blPwV'></div><div id='blPwBar'><div id='blPwM'></div><i id='blPwNeedle'></i></div><small>POTENCIA</small><button id='blTira'>🎱 TIRAR</button></div></div>
- <div id='blSpinModal' class='hidden'><div id='blSpinCard'><b>¿Dónde quieres golpear la blanca?</b><canvas id='blSp' width='260' height='260'></canvas><small>Arrastra el punto rojo para elegir el efecto</small><button id='blSpinDone'>LISTO</button></div></div>`;
+ <div id='blR'><div id='blFine'><small>AJUSTE FINO</small><div class='blFineBtns'><button id='blLeftFine' aria-label='Apuntar un poco a la izquierda'>‹</button><button id='blRightFine' aria-label='Apuntar un poco a la derecha'>›</button></div><span id='blFineVal'>0.5°</span><small>Dirección</small></div><div id='blPwV'></div><div id='blPwBar'><div id='blPwM'></div><i id='blPwNeedle'></i></div><small>POTENCIA</small><button id='blTira'>🎱 TIRAR</button></div></div>
+`;
  document.body.appendChild(o);
  BLCV=$('blCv');BLX=BLCV.getContext('2d');
  const abrir=()=>{o.classList.remove('hidden');try{const d=document.documentElement;d.requestFullscreen&&d.requestFullscreen().catch(()=>{})}catch(e){}blFit();blUI()};
@@ -790,17 +812,15 @@ function blInit(){
  cueTrack.addEventListener('pointerdown',e=>{if(!blOK())return;e.preventDefault();cueDrag=true;try{cueTrack.setPointerCapture(e.pointerId)}catch(er){}cueSet(e)});
  cueTrack.addEventListener('pointermove',e=>{if(cueDrag)cueSet(e)});
  cueTrack.addEventListener('pointerup',()=>cueDrag=false);cueTrack.addEventListener('pointercancel',()=>cueDrag=false);
- $('blSpOpen').onclick=()=>{if(blOK())$('blSpinModal').classList.remove('hidden')};
- $('blSpinDone').onclick=()=>$('blSpinModal').classList.add('hidden');
- $('blSpinModal').addEventListener('pointerdown',e=>{if(e.target===$('blSpinModal'))$('blSpinModal').classList.add('hidden')});
+ const ajustarAngulo=delta=>{if(!blOK())return;BL.ang+=delta*Math.PI/180;blSync();blDib()};
+ $('blLeftFine').onclick=()=>ajustarAngulo(-0.5);$('blRightFine').onclick=()=>ajustarAngulo(0.5);
+ for(const [id,delta] of [['blLeftFine',-0.5],['blRightFine',0.5]]){const btn=$(id);let rep=null;btn.addEventListener('pointerdown',e=>{if(!blOK())return;e.preventDefault();rep=setInterval(()=>ajustarAngulo(delta),110)});const stop=()=>{if(rep){clearInterval(rep);rep=null}};btn.addEventListener('pointerup',stop);btn.addEventListener('pointercancel',stop);btn.addEventListener('pointerleave',stop)}
  const bar=$('blPwBar');let pd=0;
  const pset=e=>{if(!blOK())return;const r=bar.getBoundingClientRect();BL.pw=Math.max(.05,Math.min(1,1-(e.clientY-r.top)/r.height));blSync();blDib()};
  bar.addEventListener('pointerdown',e=>{e.preventDefault();try{bar.setPointerCapture(e.pointerId)}catch(er){}pd=1;pset(e)});
  bar.addEventListener('pointermove',e=>{if(pd)pset(e)});bar.addEventListener('pointerup',()=>{pd=0});
- const sp=$('blSp'),spIcon=$('blSpIcon'),spE=e=>{if(!blOK())return;const r=sp.getBoundingClientRect();let x=((e.clientX-r.left)/r.width*2-1)/.9,y=((e.clientY-r.top)/r.height*2-1)/.9;const l=Math.hypot(x,y);if(l>.65){x*=.65/l;y*=.65/l}BL.sx=x;BL.sy=y;blSync()};
- sp.addEventListener('pointerdown',e=>{e.preventDefault();try{sp.setPointerCapture(e.pointerId)}catch(er){}sp.dn=1;spE(e)});
- sp.addEventListener('pointermove',e=>{if(sp.dn)spE(e)});sp.addEventListener('pointerup',()=>{sp.dn=0});
- $('blTira').onclick=()=>{if(!blOK())return;const q={sx:BL.sx,sy:BL.sy};BL.sx=BL.sy=0;blSync();blTiro(BL.ang,BL.pw,q)};
+
+ $('blTira').onclick=()=>{if(!blOK())return;blTiro(BL.ang,BL.pw,{sx:0,sy:0})};
  blMarca();blFit()}
 function blFit(){
  if(!BLCV)return;const W=innerWidth,H=innerHeight,land=W>H;BLLAND=land;
@@ -813,16 +833,9 @@ function blFit(){
 function blSync(){const b=BL;if(!b||!$('blAngV'))return;
  const d=((b.ang*180/Math.PI+90+540)%360)-180,z=Math.abs(d)<.3;
  $('blAngV').innerHTML=(z?'0°':Math.abs(d).toFixed(1)+'°')+'<small>'+(z?'recto':d<0?'izquierda':'derecha')+'</small>';
+ $('blAngV').innerHTML=(z?'0°':Math.abs(d).toFixed(1)+'°')+'<small>'+(z?'recto':d<0?'izquierda':'derecha')+'</small>';
  const dial=$('blDial');if(dial)dial.style.backgroundPositionY=(d*10)+'px';
- $('blPwV').textContent=Math.round(b.pw*100)+'%';$('blPwM').style.height=((1-b.pw)*100)+'%';$('blPwNeedle').style.bottom=(b.pw*100)+'%';$('blCueHandle').style.top=(b.pw*100)+'%';$('blCueStick').style.top=(5+(1-b.pw)*35)+'%';blSpD()}
-function blSpD(){
- const draw=c=>{if(!c||!BL)return;const g=c.getContext('2d'),W=c.width,r=W/2-6;g.clearRect(0,0,W,W);
- g.fillStyle='#f8fafc';g.beginPath();g.arc(W/2,W/2,r,0,7);g.fill();g.strokeStyle='#94a3b8';g.lineWidth=Math.max(2,W*.018);g.stroke();
- g.strokeStyle='rgba(0,0,0,.25)';g.lineWidth=1.5;g.beginPath();g.moveTo(W/2,10);g.lineTo(W/2,W-10);g.moveTo(10,W/2);g.lineTo(W-10,W/2);g.stroke();
- g.setLineDash([6,6]);g.beginPath();g.arc(W/2,W/2,r*.65,0,7);g.stroke();g.setLineDash([]);
- g.fillStyle='#dc2626';g.beginPath();g.arc(W/2+BL.sx*r/.9,W/2+BL.sy*r/.9,Math.max(5,W*.055),0,7);g.fill();g.strokeStyle='#fff';g.lineWidth=3;g.stroke()};
- draw($('blSp'));draw($('blSpIcon'));
-}
+ $('blPwV').textContent=Math.round(b.pw*100)+'%';$('blPwM').style.height=((1-b.pw)*100)+'%';$('blPwNeedle').style.bottom=(b.pw*100)+'%';$('blCueHandle').style.top=(b.pw*100)+'%';$('blCueStick').style.top=(5+(1-b.pw)*35)+'%';const fv=$('blFineVal');if(fv)fv.textContent='0.5° por toque'}
 function blCtlEstado(){if(!$('blTira'))return;const on=blOK();$('blTira').disabled=!on;$('blL').style.opacity=$('blR').style.opacity=on?1:.5}
 function blApunta(p){const c=BL.balls[0];if(Math.hypot(p[0]-c.x,p[1]-c.y)>3){BL.ang=Math.atan2(c.y-p[1],c.x-p[0]);blSync();blDib()}}
 function blMarca(){document.querySelectorAll('#blMd button').forEach(b=>b.classList.toggle('ghost',!(b.dataset.m===BLM&&(BLM==='2p'||b.dataset.l===BLL))))}
@@ -835,7 +848,8 @@ function blUI(){
    for(const n of ns){const on=b.balls.find(x=>x.n===n).on,c=BLC[n>8?n-8:n];d+='<span class="md" style="background:'+(n>8?'linear-gradient(#fff 0 28%,'+c+' 28% 72%,#fff 72%)':c)+(on?'':';opacity:.2')+'"></span>'}
    if(rest===0)d+='<span class="md" style="background:#111"></span>';
    q=rest===0?'8':rest}
-  h+='<div class="jch'+(b.turn===i&&!b.over?' on':'')+'"><div class="n"><span>'+nm(i)+'</span><i>'+(g?(g==='s'?'lisas ':'rayadas ')+q:'')+'</i></div><div class="d">'+d+'</div></div>'}
+  const estado=b.over?(b.winner===i?'<b class=\"result win\">WINNER</b>':'<b class=\"result lose\">LOSE</b>'):'';
+  h+='<div class="jch'+(b.turn===i&&!b.over?' on':'')+'"><div class="n"><span>'+nm(i)+estado+'</span><i>'+(g?(g==='s'?'lisas ':'rayadas ')+q:'')+'</i></div><div class="d">'+d+'</div></div>'}
  $('blJ').innerHTML=h;
  $('blEst').textContent=b.over?'Partida terminada':'Turno: '+nm(b.turn)+(b.inHand?' · toca la mesa para colocar la blanca':'');
  $('blMsg').textContent=b.msg;blCtlEstado();blSync()}
@@ -898,18 +912,18 @@ function blFin(){
  if(pk.includes(8)){if(brk){blRepon8()}else{
   if(!falta&&gm&&blRest(gm)===0)return blGana(me,'Metió la 8');
   return blGana(op,'Metió la 8 antes de tiempo')}}
- let sigue=false,asig=false;
+ let sigue=false,asig=false,ultimaPropia=false;
  if(!falta&&!brk){
   if(!b.group[0]&&!b.group[1]){if(pk.length){b.group[me]=blTipo(pk[0]);b.group[op]=b.group[me]==='s'?'t':'s';sigue=true;asig=true}}
-  else if(pk.some(n=>blTipo(n)===b.group[me]))sigue=true}
+  else if(pk.some(n=>blTipo(n)===b.group[me])){sigue=true;ultimaPropia=blRest(gm)===0&&pk.some(n=>blTipo(n)===gm)}}
  if(scratch){cue.on=true;cue.x=220;cue.y=640;cue.vx=cue.vy=0}cue.top=cue.side=0;
  const falloDelSaque=brk&&!scratch&&pk.length===0;
  b.inHand=falta||falloDelSaque;if(sigue)b.shot=(b.shot||0)+1;else{b.turn=op;b.shot=0}
- b.msg=(brk&&pk.length?'Al romper no cuenta ninguna bola. ':'')+(asig?blJug(me)+' va con '+(b.group[me]==='s'?'lisas':'rayadas')+'. ':'')+(falta?'Falta: '+motivo+'. ':'')+(falloDelSaque?'Falló el saque: '+blJug(b.turn)+' puede colocar la blanca donde quiera. ':'')+(b.inHand&&!falloDelSaque?blJug(b.turn)+' coloca la blanca donde quiera.':(sigue?'Sigue tirando '+blJug(me)+'.':'Turno de '+blJug(b.turn)+'.'));
+ b.msg=(brk&&pk.length?'Al romper no cuenta ninguna bola. ':'')+(asig?blJug(me)+' va con '+(b.group[me]==='s'?'lisas':'rayadas')+'. ':'')+(falta?'Falta: '+motivo+'. ':'')+(falloDelSaque?'Falló el saque: '+blJug(b.turn)+' puede colocar la blanca donde quiera. ':'')+(b.inHand&&!falloDelSaque?blJug(b.turn)+' coloca la blanca donde quiera.':(ultimaPropia?'¡Metiste tu última bola! Sigues tú para tirar a la negra.':(sigue?'Sigue tirando '+blJug(me)+'.':'Turno de '+blJug(b.turn)+'.')));
  b.pk=[];b.first=null;blUI();blDib();blGuardar();blSig()}
 function blRepon8(){const R=BLG.R,e=BL.balls.find(x=>x.n===8);e.on=false;let y=300-2*(2*R*.866+.6);for(let k=0;k<20&&!(e.x=220,e.y=y,blLibre(220,y));k++)y-=2*R+1;e.x=220;e.y=y;e.vx=e.vy=0;e.on=true}
 function blGana(w,txt){
- const b=BL;b.over=true;b.pk=[];
+ const b=BL;b.over=true;b.winner=w;b.pk=[];
  b.msg='🏆 '+txt+'. ¡Gana '+(b.mode==='cpu'?(w===0?'Tú':'la computadora'):'el Jugador '+(w+1))+'!';
  if(b.mode==='cpu'&&w===0&&!b.auto){const pts={f:10,n:25,d:50}[b.lvl]||25;b.msg+=' +'+pts+' puntos';try{guardarRanking(pts)}catch(e){}try{hit('jug',1);hit('part')}catch(e){}}
  blUI();blDib();blGuardar()}
